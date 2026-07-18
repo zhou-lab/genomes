@@ -36,3 +36,5 @@ raw-served over `https://github.com/zhou-lab/genomes/raw/<tag>/<build>/<file>`.
 | build | source |
 |---|---|
 | hg38 | `sesameData_getGenomeInfo("hg38")` |
+| mm10 | `sesameData_getGenomeInfo("mm10")` |
+| mm39 | `sesameData_getGenomeInfo("mm39")` |
