@@ -16,12 +16,14 @@ One folder per genome build, versioned by **git tag** (`v1`, `v2`, …):
 <build>/gaps.tsv.gz              chrom <TAB> start <TAB> end     (assembly gaps to skip)
 <build>/cytoband.tsv.gz          chrom start end band stain      (ideogram, plot-only)
 <build>/genes.bed.gz (+.tbi)     GENCODE transcript models (tabix BED12+)
+<build>/cpg_nocontig.cr          every CpG on the primary assembly (YAME .cr)
 ```
 
 `seqinfo` + `gaps` drive `getBinCoordinates` (tile the genome into bins, carve
 out the gaps); `cytoband` is only for the ideogram; these three are exported from
 `sesameData` by `tools/export_genomeinfo.R` in the sesame-cli repo. `genes.*` is
 built here from GENCODE by `tools/build_genes.sh` (see **Gene models** below).
+`cpg_nocontig.cr` is the CpG coordinate stream (see **CpG coordinates** below).
 
 ## Gene models
 
@@ -53,8 +55,8 @@ plain indexable BED, not an R `GRangesList`.
 
 Each build uses the GENCODE release its `sesameData` `txns` came from. The file
 name is unversioned (like `seqinfo`/`gaps`/`cytoband`) — the release is pinned by
-git tag, and the exact source URL is recorded next to the file in
-`genes.bed.gz.source`. Bumping GENCODE means rerunning the builder and cutting a
+git tag, and the exact source URL is recorded in the
+suite registry (`tools/registry/catalog/` in YAME). Bumping GENCODE means rerunning the builder and cutting a
 new tag.
 
 | build | GENCODE release | source GTF |
@@ -68,6 +70,25 @@ new tag.
 cd tools && ./build_genes.sh hg38 \
   https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_36/gencode.v36.annotation.gtf.gz ..
 ```
+
+## CpG coordinates
+
+`cpg_nocontig.cr` is the genome's CpG coordinate stream in YAME's `.cr` format:
+every CpG on the primary assembly, in coordinate order, contigs and alternate
+haplotypes excluded. It is the row space every `.cg` methylation store in the
+suite is written against, so a tool that reads such a store needs this file to
+say where row *i* is.
+
+These are the same bytes `KYCGKB_<build>` publishes at its own tag — the
+knowledgebase repos keep their copy, since a knowledgebase is unusable without
+it. They live here as well so a tool that wants coordinates and nothing else
+does not have to depend on a knowledgebase repo.
+
+| build | CpGs | size |
+|---|---|---|
+| hg38 | 29,401,795 | 30 MB |
+| mm10 | 21,867,837 | 23 MB |
+| mm39 | 21,889,506 | 23 MB |
 
 ## Fetch
 
